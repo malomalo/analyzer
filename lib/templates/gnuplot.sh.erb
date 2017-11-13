@@ -1,0 +1,76 @@
+reset
+set terminal pngcairo enhanced font "arial,12" fontscale 1.0 size 900, 1300
+set output '<%= output %>'
+
+# define axis
+# remove border on top and right and set color to gray
+set style line 11 lc rgb '#808080' lt 1
+set border 3 back ls 11
+set tics nomirror
+# define grid
+set style line 12 lc rgb '#808080' lt 0 lw 1
+set grid back ls 12
+
+set key center bottom horizontal
+
+set style line 1 linetype 1 linecolor rgb '#5e64ff' pointtype 1 pointsize 1 linewidth 1 # blue
+set style line 2 linetype 1 linecolor rgb '#ffa00a' pointtype 1 pointsize 1 linewidth 1 # orange
+set style line 3 linetype 1 linecolor rgb '#28a745' pointtype 1 pointsize 1 linewidth 1 # green
+set style line 4 linetype 1 linecolor rgb '#b554ff' pointtype 1 pointsize 1 linewidth 1 # purple
+set style line 5 linetype 1 linecolor rgb '#ff5858' pointtype 1 pointsize 1 linewidth 1 # red
+set style line 6 linetype 1 linecolor rgb '#FEEF72' pointtype 1 pointsize 1 linewidth 1 # yellow
+set style line 7 linetype 1 linecolor rgb '#7CD6FD' pointtype 1 pointsize 1 linewidth 1 # light-blue
+set style line 8 linetype 1 linecolor rgb '#8b1a0e' pointtype 1 pointsize 1 linewidth 1 # dark-red
+
+
+set multiplot layout 5, 1
+set tmargin 4
+set bmargin 4
+
+set title "Iterations / Sec" font ",14"
+set key off
+set format y '%.1s %c'
+
+
+
+set boxwidth 0.15 absolute
+
+set style data boxplot
+set style boxplot range 2 nooutliers candlesticks
+set style fill solid 0.2
+set xtics (<%= tests.map.with_index { |f, i| "'#{escape(f)}' #{i+1}"}.join(', ') %>) scale 0,0
+
+plot <%= tests.map.with_index { |t, i| "'#{File.join(data_dir, 'ips', t)}' using (#{i+1}.0):1 with boxplot linestyle #{i+1}" }.join(', ') %>
+
+
+set title "GC Objects Allocated"
+set key on
+set yrange [0:*]
+set xrange [0:5]
+set xtics autofreq
+
+
+plot <%= tests.map.with_index { |k, i| "'#{File.join(data_dir, 'gc', k)}' using 2:5 title '#{escape(k)}' with steps linestyle #{i+1}" }.join(', ') %>
+
+set title "GC Objects Freed"
+set key on
+set yrange [0:*]
+set xrange [0:5]
+
+plot <%= tests.map.with_index { |k, i| "'#{File.join(data_dir, 'gc', k)}' using 2:6 title '#{escape(k)}' with steps linestyle #{i+1}" }.join(', ') %>
+
+set title "GC Retained"
+set key on
+set yrange [0:*]
+set xrange [0:5]
+
+plot <%= tests.map.with_index { |k, i| "'#{File.join(data_dir, 'gc', k)}' using 2:(\\$3-\\$4) title '#{escape(k)}' with steps linestyle #{i+1}" }.join(', ') %>
+
+# , \\$alloc#{k} using 1:8 with impulses linestyle 7 title 'minor' axes x1y2, \\$alloc#{k} using 1:9 with impulses linestyle 8 title 'major' axes x1y2
+
+set title "RSS"
+set key on
+set yrange [0:*]
+set xrange [0:5]
+
+plot <%= tests.map.with_index { |k, i| "'#{File.join(data_dir, 'rss', k)}' using 2:3 title '#{escape(k)}' with steps linestyle #{i+1}" }.join(', ') %>

@@ -1,0 +1,61 @@
+<%= lib %>
+<%= setup %>
+
+__analyzer_not_done = true
+__analyzer_t = Time.now.to_f
+__analyzer_gc_stat = GC.stat
+
+STDOUT.write("[[".freeze)
+STDOUT.write(__analyzer_t.to_s)
+STDOUT.write(",".freeze)
+STDOUT.write(__analyzer_gc_stat[:total_allocated_objects].to_s)
+STDOUT.write(",".freeze)
+STDOUT.write(__analyzer_gc_stat[:total_freed_objects].to_s)
+STDOUT.write(",".freeze)
+STDOUT.write(__analyzer_gc_stat[:minor_gc_count].to_s)
+STDOUT.write(",".freeze)
+STDOUT.write(__analyzer_gc_stat[:major_gc_count].to_s)
+STDOUT.write("]".freeze)
+
+__analyzer_mt = Thread.new do
+  while __analyzer_not_done do
+    __analyzer_sleep_t = 0.02 - (Time.now.to_f - __analyzer_t)
+    sleep(__analyzer_sleep_t) if __analyzer_sleep_t > 0
+
+    __analyzer_t = Time.now.to_f
+    __analyzer_gc_stat = GC.stat
+    STDOUT.write(",[".freeze)
+    STDOUT.write(__analyzer_t.to_s)
+    STDOUT.write(",".freeze)
+    STDOUT.write(__analyzer_gc_stat[:total_allocated_objects].to_s)
+    STDOUT.write(",".freeze)
+    STDOUT.write(__analyzer_gc_stat[:total_freed_objects].to_s)
+    STDOUT.write(",".freeze)
+    STDOUT.write(__analyzer_gc_stat[:minor_gc_count].to_s)
+    STDOUT.write(",".freeze)
+    STDOUT.write(__analyzer_gc_stat[:major_gc_count].to_s)
+    STDOUT.write("]".freeze)
+  end
+  
+  __analyzer_t = Time.now.to_f
+  __analyzer_gc_stat = GC.stat
+  STDOUT.write(",[".freeze)
+  STDOUT.write(__analyzer_t.to_s)
+  STDOUT.write(",".freeze)
+  STDOUT.write(__analyzer_gc_stat[:total_allocated_objects].to_s)
+  STDOUT.write(",".freeze)
+  STDOUT.write(__analyzer_gc_stat[:total_freed_objects].to_s)
+  STDOUT.write(",".freeze)
+  STDOUT.write(__analyzer_gc_stat[:minor_gc_count].to_s)
+  STDOUT.write(",".freeze)
+  STDOUT.write(__analyzer_gc_stat[:major_gc_count].to_s)
+  STDOUT.write("]]".freeze)
+
+end
+
+__analyzer_start = Time.now.to_f
+while Time.now.to_f - __analyzer_start < 5
+  <%= src %>
+end
+__analyzer_not_done = false
+__analyzer_mt.join

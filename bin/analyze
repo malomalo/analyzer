@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+require 'optparse'
+require File.expand_path('./../../lib/analyzer', __FILE__)
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: analyze [switches] script [script] ... [report.png]"
+
+  opts.on("-b", "--bootstrap SCRIPT", "Script to run before all test") do |v|
+    options[:bootstrap] = v
+  end
+
+  opts.on("-l", "--lib SCRIPT", "Script require before the bootstrap and all test scripts") do |v|
+    options[:lib] = v
+  end
+
+  opts.on("-n x,y,z", Array, "Example 'list' of arguments") do |list|
+    options[:n] = list.map(&:to_i)
+  end
+  
+  opts.on('-o', '--output DESTINATION', 'File where output will be placed') do |v|
+    options[:output] = v
+  end
+end.parse!
+files = ARGV.clone
+
+analyzer = Analyzer.new(*files, **options)
+analyzer.plot(File.expand_path(options[:output] || 'report.png'))

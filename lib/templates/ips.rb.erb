@@ -1,0 +1,23 @@
+<%= lib %>
+<%= setup %>
+
+require 'benchmark/ips'
+
+class Benchmark::IPS::Job
+  def create_stats(samples)
+    samples
+  end
+  
+  def create_report(label, measured_us, iter, samples, cycles)
+    require 'json'
+    STDOUT.puts JSON.generate(samples)
+    @full_report.add_entry label, measured_us, iter, Benchmark::IPS::Stats::SD.new(samples), cycles
+  end
+end
+
+Benchmark.ips(quiet: true) do |x|
+  x.config(stats: :bootstrap, confidence: 98)
+  x.report("analyze", <<-CODEFILE)
+    <%= src %>
+  CODEFILE
+end

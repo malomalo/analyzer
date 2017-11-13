@@ -1,0 +1,49 @@
+<%= lib %>
+<%= setup %>
+
+__analyzer_read, __analyzer_write = IO.pipe
+if child_pid = fork
+  __analyzer_read.close
+  require '<%= File.join(analyzer_dir, 'analyzer/rss') %>'
+
+  not_done = true
+  bytes = 0
+  monitor = Analyzer::Rss.new(child_pid)
+  
+  
+  
+  time = Time.now.to_f
+  bytes = monitor.bytes
+  
+  STDOUT.write("[[".freeze)
+  STDOUT.write(time.to_s)
+  STDOUT.write(",".freeze)
+  STDOUT.write(bytes.to_s)
+  STDOUT.write("]".freeze)
+  
+  __analyzer_write.puts "go".freeze
+  __analyzer_write.close
+  while bytes != 0 do
+    sleep_time = 0.02 - (Time.now.to_f - time)
+    sleep(sleep_time) if sleep_time > 0
+    
+    time = Time.now.to_f
+    bytes = monitor.bytes
+    STDOUT.write(",[".freeze)
+    STDOUT.write(time.to_s)
+    STDOUT.write(",".freeze)
+    STDOUT.write(bytes.to_s)
+    STDOUT.write("]".freeze)
+  end
+  
+  STDOUT.write("]".freeze)
+else
+  __analyzer_write.close
+  raise 'fail' if __analyzer_read.gets != "go\n".freeze
+  __analyzer_read.close
+  
+  __analyzer_start = Time.now.to_f
+  while Time.now.to_f - __analyzer_start < 5
+    <%= src %>
+  end
+end
