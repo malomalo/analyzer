@@ -24,5 +24,6 @@ OptionParser.new do |opts|
 end.parse!
 files = ARGV.clone
 
+output_file = File.expand_path(options.delete(:output) || 'report.png')
 analyzer = Analyzer.new(*files, **options)
-analyzer.plot(File.expand_path(options[:output] || 'report.png'))
+analyzer.plot(output_file)
