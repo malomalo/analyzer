@@ -14,7 +14,7 @@ OptionParser.new do |opts|
     options[:lib] = v
   end
 
-  opts.on("-n x,y,z", Array, "Example 'list' of arguments") do |list|
+  opts.on("-n x,y,z", Array, "A paramater N that will be defined in the test. Each test will run once for each N") do |list|
     options[:n] = list.map(&:to_i)
   end
   

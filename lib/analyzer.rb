@@ -1,18 +1,26 @@
 require 'erb'
 require 'json'
 require 'tmpdir'
+require 'fileutils'
 
 class Analyzer
   
   def initialize(*test_files, bootstrap: nil, lib: nil, n: nil)
     @bootstrap = bootstrap
     @lib = lib
-    @n = n
+    @n = n || [1]
     @test_files = test_files
+    
+    @keys = test_files.map { |fn| File.basename(fn, '.*') }
+    depth = -1
+    while @keys.uniq.length < @keys.length
+      @keys = test_files.map { |fn| ( File.dirname(fn).split(File::SEPARATOR)[depth..-1] + [File.basename(fn, '.*')] ).join(File::SEPARATOR) }
+      depth -= 1
+    end
   end
   
   def key(value)
-    File.basename(value, ".*")
+    @keys[@test_files.index(value)]
   end
   
   def tests
@@ -29,23 +37,24 @@ class Analyzer
   end
 
   def write_results_for(type, dir)
-    Dir.mkdir(File.join(dir, type))
-    @test_files.each do |src|
-      File.open(File.join(dir, type, key(src)), 'w') do |file|
-        send(:"output_#{type}_results", calculate_results_for(type, File.read(src)), file)
+    @n.each do |n|
+      FileUtils.mkdir_p(File.join(dir, type, n.to_s))
+      @test_files.each do |src|
+        File.open(File.join(dir, type, n.to_s, key(src)), 'w') do |file|
+          send(:"output_#{type}_results", calculate_results_for(type, File.read(src), n), file)
+        end
       end
     end
   end
 
-  def calculate_results_for(type, src)
+  def calculate_results_for(type, src, n=1)
     lib = @lib ? File.read(File.expand_path(@lib)) : ''
+    setup = "N=#{n}\n"
     
     if src.index("\n__SETUP__\n")
       src = src.split("\n__SETUP__\n")
-      setup = src[0]
+      setup << src[0]
       src = src[1]
-    else
-      setup = ''
     end
     
     analyzer_dir = File.expand_path("../", __FILE__)
