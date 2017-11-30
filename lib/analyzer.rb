@@ -38,12 +38,12 @@ class Analyzer
 
   def write_results_for(type, dir)
     @n.each do |n|
-      if key(src).index(File::SEPARATOR)
-        FileUtils.mkdir_p(File.join(dir, type, n.to_s, File.dirname(key(src))))
-      else
-        FileUtils.mkdir_p(File.join(dir, type, n.to_s))
-      end
       @test_files.each do |src|
+        if key(src).index(File::SEPARATOR)
+          FileUtils.mkdir_p(File.join(dir, type, n.to_s, File.dirname(key(src))))
+        else
+          FileUtils.mkdir_p(File.join(dir, type, n.to_s))
+        end
         File.open(File.join(dir, type, n.to_s, key(src)), 'w') do |file|
           send(:"output_#{type}_results", calculate_results_for(type, File.read(src), n), file)
         end
