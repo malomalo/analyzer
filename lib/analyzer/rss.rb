@@ -39,7 +39,7 @@ class Analyzer
     # Pull memory from `ps` command, takes more resources and can freeze
     # in low memory situations
     def ps_memory
-      KB_TO_BYTE * BigDecimal.new(`ps -o rss= -p #{@pid}`)
+      KB_TO_BYTE * BigDecimal(`ps -o rss= -p #{@pid}`)
     end
   
   end
