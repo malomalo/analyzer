@@ -64,7 +64,7 @@ class Analyzer
     analyzer_dir = File.expand_path("../", __FILE__)
     template = File.read(File.expand_path("../templates/#{type}.rb.erb", __FILE__))
     _script = ''
-    ERB.new(template, nil, nil, "_script").result(binding)
+    ERB.new(template, eoutvar: "_script").result(binding)
     results = `ruby <<'TESTSCRIPT'\n#{_script}\nTESTSCRIPT`
   
     if $? == 0
@@ -110,7 +110,7 @@ class Analyzer
       template = File.read(File.expand_path('../templates/gnuplot.sh.erb', __FILE__))
       _script = ''
       data_dir = dir
-      ERB.new(template, nil, nil, "_script").result(binding)
+      ERB.new(template, eoutvar: "_script").result(binding)
       `gnuplot <<-GNUPLOT\n#{_script}\nGNUPLOT`
     end
   end

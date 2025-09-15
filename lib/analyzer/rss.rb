@@ -11,7 +11,7 @@ class Analyzer
     def initialize(pid = Process.pid)
       @pid          = pid
       @status_file  = "/proc/#{@pid}/status"
-      @linux        = File.exists?(@status_file)
+      @linux        = File.exist?(@status_file)
     end
   
     def bytes
